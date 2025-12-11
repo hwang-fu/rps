@@ -8,34 +8,33 @@
 
 #define loop for(;;)
 
-int8_t choose_rock()
+int8_t choose_item(borrowed const char * prompt, borrowed const char * const * items, copied const int8_t count)
 {
     int8_t idx = 0;
     loop
     {
-        printf("Choose the rock style: ");
-        for (int8_t i = 0; i < rocks_count; i++)
+        printf("%s", prompt);
+        for (int8_t i = 0; i < count; i++)
         {
             if (i == idx)
             {
-                printf(CRAYON_TO_UNDERLINE("%s"), rocks[i]);
+                printf(CRAYON_TO_REVERSED("%s"), items[i]);
             }
             else
             {
-                printf("%s", rocks[i]);
+                printf("%s", items[i]);
             }
         }
         fflush(stdout);
+
         copied key_t key = keyboard_key_event();
         if (key == key_left && idx > 0)
         {
-            printf("\r");
-            idx = (idx - 1) % rocks_count;
+            idx--;
         }
-        else if (key == key_right && idx < rocks_count - 1)
+        else if (key == key_right && idx < count - 1)
         {
-            printf("\r");
-            idx = (idx + 1) % rocks_count;
+            idx++;
         }
         else if (key == key_enter)
         {
@@ -47,110 +46,39 @@ int8_t choose_rock()
             printf("\r\n");
             exit(EXIT_SUCCESS);
         }
-        else
-        {
-            printf("\r");
-        }
+
+        printf("\r");
     }
+}
+
+int8_t choose_rock()
+{
+    return choose_item("Choose the rock style: ", rocks, rocks_count);
 }
 
 int8_t choose_paper()
 {
-    int8_t idx = 0;
-    loop
-    {
-        printf("Choose the paper style: ");
-        for (int8_t i = 0; i < papers_count; i++)
-        {
-            if (i == idx)
-            {
-                printf(CRAYON_TO_UNDERLINE("%s"), papers[i]);
-            }
-            else
-            {
-                printf("%s", papers[i]);
-            }
-        }
-        fflush(stdout);
-        copied key_t key = keyboard_key_event();
-        if (key == key_left && idx > 0)
-        {
-            printf("\r");
-            idx = (idx - 1) % papers_count;
-        }
-        else if (key == key_right && idx < papers_count - 1)
-        {
-            printf("\r");
-            idx = (idx + 1) % papers_count;
-        }
-        else if (key == key_enter)
-        {
-            printf("\r\n");
-            return idx;
-        }
-        else if (key == (ctrl_mask | 'q'))
-        {
-            printf("\r\n");
-            exit(EXIT_SUCCESS);
-        }
-        else
-        {
-            printf("\r");
-        }
-    }
+    return choose_item("Choose the paper style: ", papers, papers_count);
 }
 
 int8_t choose_scissor()
 {
-    int8_t idx = 0;
-    loop
-    {
-        printf("Choose the scissor style: ");
-        for (int8_t i = 0; i < scissors_count; i++)
-        {
-            if (i == idx)
-            {
-                printf(CRAYON_TO_UNDERLINE("%s"), scissors[i]);
-            }
-            else
-            {
-                printf("%s", scissors[i]);
-            }
-        }
-        fflush(stdout);
-        copied key_t key = keyboard_key_event();
-        if (key == key_left && idx > 0)
-        {
-            printf("\r");
-            idx = (idx - 1) % scissors_count;
-        }
-        else if (key == key_right && idx < scissors_count - 1)
-        {
-            printf("\r");
-            idx = (idx + 1) % scissors_count;
-        }
-        else if (key == key_enter)
-        {
-            printf("\r\n");
-            return idx;
-        }
-        else if (key == (ctrl_mask | 'q'))
-        {
-            printf("\r\n");
-            exit(EXIT_SUCCESS);
-        }
-        else
-        {
-            printf("\r");
-        }
-    }
+    return choose_item("Choose the scissor style: ", scissors, scissors_count);
+}
+
+void setup()
+{
+    terminal_enter_raw_mode();
+}
+
+void fin()
+{
+    terminal_leave_raw_mode();
 }
 
 int main()
 {
-    terminal_enter_raw_mode();
-
-    // printf(CRAYON_TO_BOLD("Ctrl-Q") " to quit\r\n");
+    setup();
 
     int8_t rock_idx = choose_rock();
     printf("Chosen %s\r\n", rocks[rock_idx]);
@@ -168,7 +96,7 @@ int main()
         printf("key = %s\r\n", keyboard_key_event_name_map(key));
     } while (key != (ctrl_mask | 'q'));
 
-    terminal_leave_raw_mode();
+    fin();
 
     return 0;
 }
