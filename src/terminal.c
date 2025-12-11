@@ -104,6 +104,8 @@ void terminal_enter_raw_mode()
 
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &term);
 
+    terminal_cursor_hide();
+
     terminal_setup_raw_mode_signals_();
 
     atexit(terminal_leave_raw_mode);
@@ -119,6 +121,8 @@ void terminal_leave_raw_mode()
     }
 
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &_terminal_state.original);
+
+    terminal_cursor_show();
 
     _terminal_state.raw = false;
 }
