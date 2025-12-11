@@ -1,5 +1,6 @@
 #pragma once
 
+#include <unistd.h>
 #include "common.h"
 
 void terminal_enter_raw_mode();
