@@ -46,7 +46,5 @@ enum
     key_f12,
 };
 
-copied key_t terminal_key_read();
-
-borrowed const char * key_name_map(copied const key_t key);
+borrowed const char * keyboard_key_event_name_map(copied const key_t key);
 
