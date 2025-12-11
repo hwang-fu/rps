@@ -18,12 +18,8 @@
 #define ESC                 "\x1b"
 #define CSI                 ESC "["
 
-#define CURSOR_HOME         (CSI "H")           // move cursor to (1,1) which is the top-left corner
 #define CURSOR_HIDE         (CSI "?25l")        // hide cursor
 #define CURSOR_SHOW         (CSI "?25h")        // show cursor
-#define CURSOR_LOCATION     (CSI "%lu;%luH")    // move cursor to (row, column)
-
-#define TERMINAL_CLR        (CSI "2J")          // clear the entire terminal screen
 
 /* ─────────────────────────────────────────────────────────────────────────────
  * Module State
@@ -31,7 +27,7 @@
 
 static struct {
     copied struct termios original;         /* Original terminal attributes */
-    copied bool raw;                        /* True if raw mode is active */
+    copied bool           raw;              /* True if raw mode is active */
 } _terminal_state = {
     .original = { 0 },
     .raw      = false,
@@ -42,7 +38,7 @@ static struct {
  * ───────────────────────────────────────────────────────────────────────────── */
 
 static void terminal_setup_raw_mode_signals_();
-static void terminal_sig_default_handler_(int sig);
+static void terminal_sig_default_handler_(copied int sig);
 
 /* ─────────────────────────────────────────────────────────────────────────────
  * Raw Mode
@@ -67,7 +63,7 @@ void terminal_enter_raw_mode()
         exit(EXIT_FAILURE);
     }
 
-    struct termios term = clone(_terminal_state.original);
+    copied struct termios term = clone(_terminal_state.original);
 
     /*
      * Input flags:
@@ -109,10 +105,12 @@ void terminal_enter_raw_mode()
     term.c_cc[VTIME] = 0;
 
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &term);
-    _terminal_state.raw = true;
 
     terminal_setup_raw_mode_signals_();
+
     atexit(terminal_leave_raw_mode);
+
+    _terminal_state.raw = true;
 }
 
 void terminal_leave_raw_mode()
@@ -121,7 +119,9 @@ void terminal_leave_raw_mode()
     {
         return;
     }
+
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &_terminal_state.original);
+
     _terminal_state.raw = false;
 }
 
@@ -143,20 +143,20 @@ void terminal_toggle_raw_mode()
 
 static void terminal_setup_raw_mode_signals_()
 {
-    struct sigaction sa = { 0 };
+    copied struct sigaction sa = { 0 };
 
     sa.sa_handler = terminal_sig_default_handler_;
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = 0;
 
-    sigaction(SIGINT, &sa, NIL);
-    sigaction(SIGTERM, &sa, NIL);
+    sigaction(SIGINT, &sa, nil);
+    sigaction(SIGTERM, &sa, nil);
 }
 
-static void terminal_sig_default_handler_(int sig)
+static void terminal_sig_default_handler_(copied int sig)
 {
     (void) sig;
-    terminal_quit();
+    terminal_leave_raw_mode();
     _exit(128 + sig);
 }
 
@@ -190,23 +190,6 @@ void terminal_writef_owned(owned char * fmt, ...)
     free(fmt);
 }
 
-void terminal_clear()
-{
-    terminal_write(TERMINAL_CLR, sizeof(TERMINAL_CLR) - 1);
-}
-
-void terminal_cursor_home()
-{
-    terminal_write(CURSOR_HOME, sizeof(CURSOR_HOME) - 1);
-}
-
-void terminal_cursor_move(copied uint64_t row, copied uint64_t column)
-{
-    char coord[25] = { 0 };
-    int n = snprintf(coord, sizeof(coord), CURSOR_LOCATION, row, column);
-    terminal_write(coord, n);
-}
-
 void terminal_cursor_hide()
 {
     terminal_write(CURSOR_HIDE, sizeof(CURSOR_HIDE) - 1);
@@ -224,7 +207,7 @@ void terminal_flush()
 
 copied int32_t terminal_read_raw_byte()
 {
-    unsigned char c;
+    copied unsigned char c;
     return (1 == read(STDIN_FILENO, &c, 1)) ? c : -1;
 }
 
