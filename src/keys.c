@@ -34,11 +34,12 @@ static copied key_t keyboard_key_event_csi_ext(copied const key_t key)
     {
         n = (n * 10) + (b - '0');
         b = terminal_raw_byte_read();
-        keyboard_event_timeout_disable();
-        if (b != '~')
-        {
-            return key_unknown;
-        }
+    }
+
+    keyboard_event_timeout_disable();
+    if (b != '~')
+    {
+        return key_unknown;
     }
 
     switch (n)
@@ -100,7 +101,6 @@ static copied key_t keyboard_key_event_csi()
         {
             keyboard_event_timeout_disable();
             return key_home;
-                ;
         } break;
 
         case 'F':
@@ -232,6 +232,7 @@ copied key_t keyboard_key_event()
     return cast(b, key_t);
 }
 
+// NOTE: this function is NOT thread-safe, use it only in single-thread situation.
 borrowed const char * keyboard_key_event_name_map(copied const key_t key)
 {
     static copied char keyname[64] = { 0 };

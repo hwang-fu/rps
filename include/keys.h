@@ -47,6 +47,7 @@ enum
 };
 
 copied key_t keyboard_key_event();
+// NOTE: this function is NOT thread-safe, use it only in single-thread situation.
 borrowed const char * keyboard_key_event_name_map(copied const key_t key);
 
 void keyboard_event_timeout_enable();
