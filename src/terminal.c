@@ -45,48 +45,6 @@ static void terminal_setup_raw_mode_signals_();
 static void terminal_sig_default_handler_(int sig);
 
 /* ─────────────────────────────────────────────────────────────────────────────
- * Lifecycle
- * ───────────────────────────────────────────────────────────────────────────── */
-
-copied result_t terminal_init()
-{
-    if (_terminal_state.raw)
-    {
-        return RESULT_OK(1);
-    }
-
-    /* must be a terminal */
-    if (0 == isatty(STDIN_FILENO))
-    {
-        return RESULT_ERR(1);
-    }
-
-    /* save original terminal attributes */
-    if (-1 == tcgetattr(STDIN_FILENO, &_terminal_state.original))
-    {
-        return RESULT_ERR(2);
-    }
-
-    terminal_enter_raw_mode();
-    terminal_setup_raw_mode_signals_();
-    terminal_size_query_();
-    tui_use_alternate_buffer();
-
-    atexit(terminal_quit);
-
-    return RESULT_OK(0);
-}
-
-void terminal_quit()
-{
-    if (!_terminal_state.raw)
-    {
-        return;
-    }
-    terminal_leave_raw_mode();
-}
-
-/* ─────────────────────────────────────────────────────────────────────────────
  * Raw Mode
  * ───────────────────────────────────────────────────────────────────────────── */
 
@@ -95,6 +53,18 @@ void terminal_enter_raw_mode()
     if (_terminal_state.raw)
     {
         return;
+    }
+
+    /* STDIN must be a terminal */
+    if (0 == isatty(STDIN_FILENO))
+    {
+        exit(EXIT_FAILURE);
+    }
+
+    /* save original terminal attributes */
+    if (-1 == tcgetattr(STDIN_FILENO, &_terminal_state.original))
+    {
+        exit(EXIT_FAILURE);
     }
 
     struct termios term = clone(_terminal_state.original);
@@ -140,6 +110,9 @@ void terminal_enter_raw_mode()
 
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &term);
     _terminal_state.raw = true;
+
+    terminal_setup_raw_mode_signals_();
+    atexit(terminal_leave_raw_mode);
 }
 
 void terminal_leave_raw_mode()
@@ -150,6 +123,18 @@ void terminal_leave_raw_mode()
     }
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &_terminal_state.original);
     _terminal_state.raw = false;
+}
+
+void terminal_toggle_raw_mode()
+{
+    if (_terminal_state.raw)
+    {
+        terminal_leave_raw_mode();
+    }
+    else
+    {
+        terminal_enter_raw_mode();
+    }
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -202,7 +187,7 @@ void terminal_writef_owned(owned char * fmt, ...)
     vfprintf(stdout, fmt, args);
     fflush(stdout);
     va_end(args);
-    free_smart(fmt);
+    free(fmt);
 }
 
 void terminal_clear()
