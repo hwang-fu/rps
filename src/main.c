@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "rps.h"
 #include "terminal.h"
@@ -41,6 +42,11 @@ int8_t choose_rock()
             printf("\r\n");
             return idx;
         }
+        else if (key == (ctrl_mask | 'q'))
+        {
+            printf("\r\n");
+            exit(EXIT_SUCCESS);
+        }
         else
         {
             printf("\r");
@@ -81,6 +87,11 @@ int8_t choose_paper()
         {
             printf("\r\n");
             return idx;
+        }
+        else if (key == (ctrl_mask | 'q'))
+        {
+            printf("\r\n");
+            exit(EXIT_SUCCESS);
         }
         else
         {
@@ -123,6 +134,11 @@ int8_t choose_scissor()
             printf("\r\n");
             return idx;
         }
+        else if (key == (ctrl_mask | 'q'))
+        {
+            printf("\r\n");
+            exit(EXIT_SUCCESS);
+        }
         else
         {
             printf("\r");
@@ -133,7 +149,6 @@ int8_t choose_scissor()
 int main()
 {
     terminal_enter_raw_mode();
-    terminal_cursor_hide();
 
     // printf(CRAYON_TO_BOLD("Ctrl-Q") " to quit\r\n");
 
@@ -154,7 +169,6 @@ int main()
     } while (key != (ctrl_mask | 'q'));
 
     terminal_leave_raw_mode();
-    terminal_cursor_show();
 
     return 0;
 }
