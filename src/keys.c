@@ -10,12 +10,14 @@
 #define ESC                 (0x1b)
 #define ESC_TIMEOUT_DS      (1) /* deciseconds (100ms) */
 
+static bool _timeout_enabled = false;
 
 static copied key_t keyboard_key_event_esc();
 static copied key_t keyboard_key_event_ctrl(copied const key_t key);
 
 static copied key_t keyboard_key_event_esc()
 {
+    keyboard_event_timeout_enable();
 }
 
 static copied key_t keyboard_key_event_ctrl(copied const key_t key)
@@ -27,7 +29,7 @@ static copied key_t keyboard_key_event_ctrl(copied const key_t key)
     return (ctrl_mask | (key - 1 + 'a'));
 }
 
-copied key_t keyboard_key_event_read()
+copied key_t keyboard_key_event()
 {
     int32_t b = terminal_raw_byte_read();
     if (b == -1)
@@ -118,4 +120,46 @@ borrowed const char * keyboard_key_event_name_map(copied const key_t key)
     }
 
     return keyname;
+}
+
+void keyboard_event_timeout_enable()
+{
+    if (_timeout_enabled)
+    {
+        return;
+    }
+
+    struct termios term;
+    tcgetattr(STDIN_FILENO, &term);
+    term.c_cc[VMIN]  = 0;
+    term.c_cc[VTIME] = ESC_TIMEOUT_DS;
+    tcsetattr(STDIN_FILENO, TCSANOW, &term);
+    _timeout_enabled = true;
+}
+
+void keyboard_event_timeout_disable()
+{
+    if (!_timeout_enabled)
+    {
+        return;
+    }
+
+    struct termios term;
+    tcgetattr(STDIN_FILENO, &term);
+    term.c_cc[VMIN]  = 1;
+    term.c_cc[VTIME] = 0;
+    tcsetattr(STDIN_FILENO, TCSANOW, &term);
+    _timeout_enabled = false;
+}
+
+void keyboard_event_timeout_toggle()
+{
+    if (_timeout_enabled)
+    {
+        keyboard_event_timeout_disable();
+    }
+    else
+    {
+        keyboard_event_timeout_enable();
+    }
 }

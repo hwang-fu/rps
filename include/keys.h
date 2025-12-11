@@ -46,5 +46,9 @@ enum
     key_f12,
 };
 
+copied key_t keyboard_key_event();
 borrowed const char * keyboard_key_event_name_map(copied const key_t key);
 
+void keyboard_event_timeout_enable();
+void keyboard_event_timeout_disable();
+void keyboard_event_timeout_toggle();
