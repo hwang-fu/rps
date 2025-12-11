@@ -254,8 +254,8 @@ borrowed const char * keyboard_key_event_name_map(copied const key_t key)
     copied key_t base = baseof(key);
     switch (base)
     {
-        case key_unknown:       name = "<NONE>";        break;
-        case key_none:          name = "<UNKNOWN>";     break;
+        case key_unknown:       name = "<UNKNOWN>";     break;
+        case key_none:          name = "<NONE>";        break;
 
         case key_tab:           name = "<TAB>";         break;
         case key_enter:         name = "<ENTER>";       break;
