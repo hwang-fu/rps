@@ -62,7 +62,7 @@ run: build
 .PHONY: clean
 clean:
 	rm -rf $(BUILD_DIR)
-	rm -rf $(TARGET)
+	rm -rf $(BIN_DIR)
 
 # Show help
 .PHONY: help
