@@ -235,6 +235,9 @@ copied key_t keyboard_key_event()
 // NOTE: this function is NOT thread-safe, use it only in single-thread situation.
 borrowed const char * keyboard_key_event_name_map(copied const key_t key)
 {
+    if (key == key_unknown) return "<UNKNOWN>";
+    if (key == key_none)    return "<NONE>";
+
     static copied char keyname[64] = { 0 };
 
     copied char meta[7] = { 0 };
@@ -255,8 +258,8 @@ borrowed const char * keyboard_key_event_name_map(copied const key_t key)
     copied key_t base = baseof(key);
     switch (base)
     {
-        case key_unknown:       name = "<UNKNOWN>";     break;
-        case key_none:          name = "<NONE>";        break;
+        case key_unknown:       name = "<UNKNOWN>";     break; /* just for suppressing the compiler warning */
+        case key_none:          name = "<NONE>";        break; /* just for suppressing the compiler warning */
 
         case key_tab:           name = "<TAB>";         break;
         case key_enter:         name = "<ENTER>";       break;
