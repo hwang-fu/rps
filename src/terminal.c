@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
 #include <unistd.h>
 #include <termios.h>
 #include <signal.h>
@@ -40,8 +41,6 @@ static struct {
  * Forward Declarations
  * ───────────────────────────────────────────────────────────────────────────── */
 
-static void terminal_enter_raw_mode_();
-static void terminal_leave_raw_mode_();
 static void terminal_setup_raw_mode_signals_();
 static void terminal_sig_default_handler_(int sig);
 
@@ -68,7 +67,7 @@ copied result_t terminal_init()
         return RESULT_ERR(2);
     }
 
-    terminal_enter_raw_mode_();
+    terminal_enter_raw_mode();
     terminal_setup_raw_mode_signals_();
     terminal_size_query_();
     tui_use_alternate_buffer();
@@ -84,14 +83,14 @@ void terminal_quit()
     {
         return;
     }
-    terminal_leave_raw_mode_();
+    terminal_leave_raw_mode();
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
  * Raw Mode
  * ───────────────────────────────────────────────────────────────────────────── */
 
-static void terminal_enter_raw_mode_()
+void terminal_enter_raw_mode()
 {
     if (_terminal_state.raw)
     {
@@ -143,7 +142,7 @@ static void terminal_enter_raw_mode_()
     _terminal_state.raw = true;
 }
 
-static void terminal_leave_raw_mode_()
+void terminal_leave_raw_mode()
 {
     if (!_terminal_state.raw)
     {
