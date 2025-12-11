@@ -11,6 +11,22 @@
 #define ESC_TIMEOUT_DS      (1) /* deciseconds (100ms) */
 
 
+static copied key_t keyboard_key_event_esc();
+static copied key_t keyboard_key_event_ctrl(copied const key_t key);
+
+static copied key_t keyboard_key_event_esc()
+{
+}
+
+static copied key_t keyboard_key_event_ctrl(copied const key_t key)
+{
+    if (key == key_tab || key == key_enter)
+    {
+        return key;
+    }
+    return (ctrl_mask | (key - 1 + 'a'));
+}
+
 copied key_t keyboard_key_event_read()
 {
     int32_t b = terminal_raw_byte_read();
@@ -21,10 +37,12 @@ copied key_t keyboard_key_event_read()
 
     if (b == ESC)
     {
+        return keyboard_key_event_esc();
     }
 
     if (0x01 <= b && b <= 0x1a)
     {
+        return keyboard_key_event_ctrl(b);
     }
 
     return cast(b, key_t);
