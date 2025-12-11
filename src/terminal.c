@@ -9,8 +9,6 @@
 #include <signal.h>
 #include <sys/ioctl.h>
 
-#include "common.h"
-
 /* ─────────────────────────────────────────────────────────────────────────────
  * ANSI Escape Sequences
  * ───────────────────────────────────────────────────────────────────────────── */
@@ -205,7 +203,7 @@ void terminal_flush()
     fflush(stdout);
 }
 
-copied int32_t terminal_read_raw_byte()
+copied int32_t terminal_raw_byte_read()
 {
     copied unsigned char c;
     return (1 == read(STDIN_FILENO, &c, 1)) ? c : -1;
